@@ -1,237 +1,152 @@
-# Expense Tracker API
+# Expense Tracker — Full-Stack Monorepo
 
-[![Node.js Version](https://img.shields.io/badge/node-%3E%3D%2018.0.0-blue.svg)](https://nodejs.org)
-[![Express Version](https://img.shields.io/badge/express-4.19.2-green.svg)](https://expressjs.com)
-[![Prisma Version](https://img.shields.io/badge/prisma-%3E%3D%205.14.0-lightblue.svg)](https://www.prisma.io)
-[![PostgreSQL](https://img.shields.io/badge/postgresql-17.6-blue.svg)](https://www.postgresql.org)
-[![License](https://img.shields.io/badge/license-MIT-purple.svg)](LICENSE)
+A personal finance management system with a secure REST API backend and a premium React dashboard.
 
-A complete, production-grade RESTful API backend built to manage personal finances, track expense categories, and generate detailed monthly spending analytics. This backend is engineered with a modular, 3-tier service-controller architecture, offering robust security, parameterized SQL querying, database indexing, and interactive developer documentation.
-
----
-
-## Features
-
-- **Authentication & Session Security**: Seamless token-based verification using stateless JSON Web Tokens (JWT) and Bcrypt password hashing.
-- **Expense CRUD Management**: Full capabilities to add, view, update, and soft-delete transactions.
-- **Analytics & Spending Summaries**: Instantly computes total spending metrics, monthly transaction aggregates, and category-wise breakdowns.
-- **Advanced Query Operations**: Out-of-the-box support for database-level pagination, query searching on titles/notes, category filtering, date range sorting, and direction checks.
-- **Soft Delete & Recovery**: Mark records as inactive to keep ledger integrity, with optional restore triggers.
-- **Interactive Documentation**: Swagger OpenAPI UI available natively at the server root for live request testing.
+![Node.js](https://img.shields.io/badge/Node.js-22-339933?logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4.x-000000?logo=express)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript)
 
 ---
 
-## Tech Stack
-
-- **Runtime Environment**: Node.js
-- **Web Application Framework**: Express.js
-- **Database Engine**: PostgreSQL
-- **Object Relational Mapper (ORM)**: Prisma ORM
-- **Authentication Standard**: JSON Web Tokens (`jsonwebtoken`)
-- **Data Security**: `bcryptjs` for salting and hashing
-- **Validation Middleware**: `express-validator`
-- **Request Logger**: `morgan`
-- **API Specification**: Swagger (`swagger-ui-express` & `swagger-jsdoc`)
-
----
-
-## Project Architecture
-
-The application adopts a **Service-Controller-Repository Pattern** to segregate HTTP parsing from transaction logic.
+## Repository Structure
 
 ```
-src/
-├── config/
-│   ├── db.js             # Prisma Client singleton
-│   └── swagger.js        # Swagger specification compiler
-├── controllers/          # Request/response controllers (thin layer)
-│   ├── auth.controller.js
-│   └── expense.controller.js
-├── services/             # Core business logic and database queries
-│   ├── auth.service.js
-│   └── expense.service.js
-├── routes/               # API endpoint routing declarations
-│   ├── auth.routes.js
-│   └── expense.routes.js
-├── middleware/           # Pipeline filters
-│   ├── auth.middleware.js # Token authentication filter
-│   ├── error.middleware.js # Centralized global error handler
-│   └── validate.middleware.js # Validation result checker
-├── utils/                # System helpers
-│   ├── appError.js       # Custom operational AppError class
-│   └── catchAsync.js     # Promise reject catcher utility
-├── validators/           # Verification rules
-│   ├── auth.validator.js
-│   └── expense.validator.js
-├── app.js                # Core app configuration
-└── server.js             # Listener entry point
+expense-tracker/
+├── backend/              ← Express + Prisma REST API
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   └── seed.js
+│   ├── src/
+│   │   ├── config/       (db.js, swagger.js)
+│   │   ├── controllers/  (auth, expense)
+│   │   ├── docs/         (postman_collection.json)
+│   │   ├── middleware/   (auth, error, validate)
+│   │   ├── routes/       (auth, expense)
+│   │   ├── services/     (auth, expense)
+│   │   ├── utils/        (appError, catchAsync)
+│   │   ├── validators/   (auth, expense)
+│   │   ├── app.js
+│   │   └── server.js
+│   ├── .env
+│   ├── package.json
+│   ├── render.yaml
+│   └── railway.json
+│
+└── frontend/             ← React 19 + Vite + TypeScript Dashboard
+    ├── src/
+    │   ├── components/ui/ (Button, Card, Input, Modal, Badge, Skeleton)
+    │   ├── hooks/         (useAuth)
+    │   ├── layouts/       (AppLayout, AuthLayout)
+    │   ├── pages/         (Dashboard, Expenses, Analytics, Profile, Settings…)
+    │   ├── routes/        (AppRoutes, PrivateRoute)
+    │   ├── services/      (api, auth.service, expense.service)
+    │   ├── types/         (index.ts)
+    │   └── utils/         (formatters, helpers)
+    ├── index.html
+    ├── package.json
+    ├── tsconfig.json
+    └── vite.config.ts
 ```
 
 ---
 
-## API Features & Endpoints
+## Backend Setup
 
-All endpoints are prefixed with `/api` and return standardized JSON responses.
-
-### 🔐 Authentication Module
-
-| Method | Endpoint | Description | Auth Required |
-| :---: | :--- | :--- | :---: |
-| **POST** | `/api/auth/register` | Register a new user | No |
-| **POST** | `/api/auth/login` | Log in and receive JWT token | No |
-| **GET** | `/api/auth/profile` | View profile details | Yes |
-| **PUT** | `/api/auth/profile` | Update profile information | Yes |
-| **POST** | `/api/auth/logout` | Request client-side session deletion | Yes |
-
-### 💸 Expense Module
-
-| Method | Endpoint | Description | Auth Required |
-| :---: | :--- | :--- | :---: |
-| **POST** | `/api/expenses` | Add a new expense | Yes |
-| **GET** | `/api/expenses` | Retrieve expenses (with pagination/filters) | Yes |
-| **GET** | `/api/expenses/:id` | Fetch single expense details | Yes |
-| **PUT** | `/api/expenses/:id` | Update an existing expense | Yes |
-| **DELETE**| `/api/expenses/:id` | Soft-delete an expense | Yes |
-| **PATCH** | `/api/expenses/:id/restore` | Restore a soft-deleted expense | Yes |
-
-### 📊 Analytics & Dashboard
-
-| Method | Endpoint | Description | Auth Required |
-| :---: | :--- | :--- | :---: |
-| **GET** | `/api/expenses/dashboard/stats` | Active count, totals, category summaries | Yes |
-| **GET** | `/api/expenses/dashboard/recent` | Retrieve the 5 most recent active expenses | Yes |
-| **GET** | `/api/expenses/analytics/category` | Spend totals grouped by category | Yes |
-| **GET** | `/api/expenses/analytics/top-categories` | Top spending categories sorted descending | Yes |
-| **GET** | `/api/expenses/analytics/monthly-summary` | 6-month aggregate spend overview | Yes |
-| **GET** | `/api/expenses/analytics/monthly-detail` | Monthly categories spending matrix | Yes |
-
----
-
-## Database Design
-
-The database schema enforces relational constraints and index queries.
-
-```
-+------------------+          +------------------+
-|      USER        |          |     EXPENSE      |
-+------------------+          +------------------+
-| id (UUID)   [PK] |------<   | id (UUID)   [PK] |
-| name             |          | title            |
-| email (UQ) [IDX] |          | amount (Decimal) |
-| password         |          | category (Enum)  |
-| createdAt        |          | expenseDate      |
-| updatedAt        |          | notes            |
-|                  |          | isDeleted [IDX]  |
-|                  |          | deletedAt        |
-|                  |          | createdAt        |
-|                  |          | updatedAt        |
-|                  |          | userId      [FK] |
-+------------------+          +------------------+
+```bash
+cd backend
+npm install
+npx prisma migrate dev --name init
+npx prisma generate
+npm run dev        # → http://localhost:5001
 ```
 
-### Relational Details
-- **User - Expense Relationship**: One-to-Many connection. Deleting a user triggers a cascade delete (`onDelete: Cascade`) for all their related expenses.
-- **Indexes**: Implemented on `User(email)`, `Expense(userId)`, `Expense(category)`, `Expense(expenseDate)`, and `Expense(isDeleted)` to ensure maximum read efficiency.
-- **Precision**: Money amounts are stored as `Decimal(10, 2)` to eliminate standard floating-point rounding errors.
-
----
-
-## Authentication Flow
-
-STATÈLESS JWT Verification is executed in the pipeline:
-1. User provides credentials to the `/api/auth/login` endpoint.
-2. The server salts and verifies passwords against hashes. On success, it issues a signed JWT token containing the User ID.
-3. The client includes this token in the `Authorization: Bearer <token>` header of subsequent requests.
-4. The `auth.middleware.js` intercepts incoming calls, verifies the signature against the server's private secret, checks if the user exists, and attaches the user payload to the request object.
-
----
-
-## Getting Started
-
-### 1. Configure the Environment
-Create a `.env` file in the project root:
-```env
+**Required `backend/.env`:**
+```
 PORT=5001
 NODE_ENV=development
-DATABASE_URL="postgresql://username:password@localhost:5432/expense_tracker_db?schema=public"
-JWT_SECRET="your-jwt-signing-secret"
-JWT_EXPIRES_IN="7d"
-CORS_ORIGIN="*"
+DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/expense_tracker
+JWT_SECRET=your-very-strong-secret-key
+JWT_EXPIRES_IN=7d
 ```
 
-### 2. Setup the Project
-Install packages and execute Prisma sync operations:
+**API Documentation:** `http://localhost:5001/api-docs`
+
+---
+
+## Frontend Setup
+
 ```bash
-# Install dependencies
+cd frontend
 npm install
-
-# Run Prisma schema migrations
-npx prisma migrate dev --name init
-
-# Populate mock users and transactions
-npx prisma db seed
+npm run dev        # → http://localhost:5173
 ```
 
-### 3. Run the Server
+The Vite dev server proxies all `/api` requests to `http://localhost:5001` automatically.
+
+**To build for production:**
 ```bash
-# Start in hot-reload development mode
-npm run dev
-
-# Start in production mode
-npm start
+npm run build
 ```
 
 ---
 
-## API Documentation
+## API Endpoints
 
-Interactive Swagger API documentation is exposed at:
-- **Local URL**: [http://localhost:5001/api-docs](http://localhost:5001/api-docs)
+### Authentication
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/auth/register` | — | Register a new user |
+| POST | `/api/auth/login` | — | Login and receive JWT |
+| GET | `/api/auth/profile` | ✅ | Get current user profile |
+| PUT | `/api/auth/profile` | ✅ | Update name / email |
+| POST | `/api/auth/logout` | ✅ | Client-side logout |
 
-To query protected endpoints, log in, copy the `token` from the response, click **Authorize** in the Swagger UI, and input your token.
+### Expenses
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/expenses` | ✅ | Create expense |
+| GET | `/api/expenses` | ✅ | List expenses (paginated, filtered, sorted) |
+| GET | `/api/expenses/:id` | ✅ | Get single expense |
+| PUT | `/api/expenses/:id` | ✅ | Update expense |
+| DELETE | `/api/expenses/:id` | ✅ | Soft delete expense |
+| PATCH | `/api/expenses/:id/restore` | ✅ | Restore soft-deleted expense |
+
+### Dashboard & Analytics
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/expenses/dashboard/stats` | ✅ | Total spent, counts, category breakdown |
+| GET | `/api/expenses/dashboard/recent` | ✅ | 10 most recent transactions |
+| GET | `/api/expenses/analytics/category` | ✅ | Spending per category |
+| GET | `/api/expenses/analytics/top-categories` | ✅ | Top spending categories |
+| GET | `/api/expenses/analytics/monthly-summary` | ✅ | Monthly spending totals |
+| GET | `/api/expenses/analytics/monthly-detail` | ✅ | Monthly breakdown by category |
 
 ---
 
-## Security Features
+## Architecture
 
-- **Stateless Authorization**: JWT token verification filters block unauthorized requests.
-- **Hashed Credentials**: Bcrypt (10 rounds) salts and hashes passwords.
-- **No SQL Injection**: Parameterized Prisma queries separate SQL code from variable parameters.
-- **Input Whitelisting**: Strict body constraints via `express-validator` validate amounts and categories.
+### Backend
+- **3-Tier Architecture**: Controllers → Services → Prisma ORM
+- **Security**: JWT, bcrypt (10 rounds), parameterized queries
+- **Error Handling**: Global error middleware with dev/prod separation
+- **Validation**: `express-validator` with strict enum whitelisting
+
+### Frontend
+- **State Management**: TanStack React Query for server state
+- **Auth**: JWT stored in localStorage with auto-expiry logout
+- **Forms**: `react-hook-form` + `zod` validation
+- **Charts**: Recharts (Area + Pie + Bar)
+- **Animations**: Framer Motion spring transitions
 
 ---
 
 ## Deployment
 
-### Render Deployment
-1. Connect your repository to **Render**.
-2. Create a new **Web Service** using the Node runtime.
-3. Configure the following build variables:
-   - **Build Command**: `npm install && npx prisma generate && npx prisma migrate deploy`
-   - **Start Command**: `npm start`
-4. Declare `DATABASE_URL`, `JWT_SECRET`, and `JWT_EXPIRES_IN` in the environment configuration section.
+### Backend → Render
+See `backend/render.yaml` for configuration.
 
-### Railway Deployment
-1. Connect your repository to **Railway**.
-2. Create a project and select **Deploy from Github**.
-3. Railway automatically detects configuration from `railway.json` using Nixpacks, runs the build command, executes migrations, and starts the service.
-
----
-
-## Future Improvements
-
-- **Token Blacklisting**: Revoke JWT sessions instantly by blacklisting tokens in a Redis cache on logout.
-- **Budget Alerts**: Enable custom monthly limits per category and trigger notification payloads.
-- **Export System**: Add support for generating PDF and CSV summaries.
-
----
-
-## Author
-
-- **Ankit Singh** - [GitHub](https://github.com/ankitsingh) / [LinkedIn](https://linkedin.com/in/ankitsingh)
-
----
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Backend → Railway
+See `backend/railway.json` for configuration.
