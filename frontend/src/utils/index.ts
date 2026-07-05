@@ -3,9 +3,11 @@ import type { Category } from '@/types';
 
 export const formatCurrency = (amount: number | string): string => {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat('en-IN', {
+  const currentCurrency = localStorage.getItem('finflow_currency') || 'INR';
+  const formatLocale = currentCurrency === 'INR' ? 'en-IN' : 'en-US';
+  return new Intl.NumberFormat(formatLocale, {
     style: 'currency',
-    currency: 'INR',
+    currency: currentCurrency,
     maximumFractionDigits: 0,
   }).format(num);
 };
