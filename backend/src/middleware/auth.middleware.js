@@ -41,7 +41,14 @@ module.exports = catchAsync(async (req, res, next) => {
     );
   }
 
-  // 4) Attach user to the request object
+  // 5) Check if the user is disabled by an admin
+  if (currentUser.isDisabled) {
+    return next(
+      new AppError('Your account has been disabled. Please contact support.', 403)
+    );
+  }
+
+  // 6) Attach user to the request object
   req.user = currentUser;
   next();
 });
