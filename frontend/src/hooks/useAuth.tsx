@@ -9,6 +9,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: LoginPayload) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
   register: (credentials: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (user: User) => void;
@@ -27,7 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const storedToken = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
 
-      if (storedToken && storedUser) {
+      if (storedToken && storedToken !== 'undefined' && storedUser && storedUser !== 'undefined') {
         setToken(storedToken);
         setUser(JSON.parse(storedUser));
         
@@ -62,7 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await authService.login(credentials);
       if (res.data.success) {
-        const { token: receivedToken, user: receivedUser } = res.data.data;
+        const { accessToken: receivedToken, user: receivedUser } = res.data.data;
         setToken(receivedToken);
         setUser(receivedUser);
         localStorage.setItem('token', receivedToken);
@@ -78,12 +79,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const loginWithGoogle = async (idToken: string) => {
+    setIsLoading(true);
+    try {
+      const res = await authService.googleLogin(idToken);
+      if (res.data.success) {
+        const { accessToken: receivedToken, user: receivedUser } = res.data.data;
+        setToken(receivedToken);
+        setUser(receivedUser);
+        localStorage.setItem('token', receivedToken);
+        localStorage.setItem('user', JSON.stringify(receivedUser));
+        toast.success('Welcome back with Google!');
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Google Login failed';
+      toast.error(message);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const register = async (credentials: RegisterPayload) => {
     setIsLoading(true);
     try {
       const res = await authService.register(credentials);
       if (res.data.success) {
-        const { token: receivedToken, user: receivedUser } = res.data.data;
+        const { accessToken: receivedToken, user: receivedUser } = res.data.data;
         setToken(receivedToken);
         setUser(receivedUser);
         localStorage.setItem('token', receivedToken);
@@ -123,6 +145,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated: !!token,
         isLoading,
         login,
+        loginWithGoogle,
         register,
         logout,
         updateUser,

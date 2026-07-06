@@ -15,6 +15,9 @@ export const authService = {
   login: (data: LoginPayload) =>
     api.post<ApiResponse<AuthResponse>>('/auth/login', data),
 
+  googleLogin: (idToken: string) =>
+    api.post<ApiResponse<AuthResponse>>('/auth/google', { idToken }),
+
   logout: () => api.post<ApiResponse<object>>('/auth/logout'),
 
   getProfile: () => api.get<ApiResponse<{ user: User }>>('/auth/profile'),
