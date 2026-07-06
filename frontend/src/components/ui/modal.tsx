@@ -59,24 +59,24 @@ export const Modal = ({ isOpen, onClose, title, children, footer }: ModalProps) 
             exit="hidden"
             variants={contentVariants}
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-            className="relative z-10 w-full max-w-lg overflow-hidden bg-white border border-surface-200 shadow-modal rounded-xl flex flex-col max-h-[85vh]"
+            className="relative z-10 w-full max-w-lg overflow-hidden bg-surface-50 border border-surface-200/50 shadow-modal rounded-xl flex flex-col max-h-[85vh]"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-surface-100">
-              <h2 className="text-base font-semibold text-surface-900">{title}</h2>
-              <Button variant="ghost" size="sm" onClick={onClose} className="!p-1 text-surface-600 hover:text-surface-900">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-surface-200/30">
+              <h2 className="text-base font-semibold text-white">{title}</h2>
+              <Button variant="ghost" size="sm" onClick={onClose} className="!p-1 text-surface-400 hover:text-white">
                 <X className="w-5 h-5" />
               </Button>
             </div>
 
             {/* Scrollable Body */}
-            <div className="flex-1 px-5 py-5 overflow-y-auto text-sm text-surface-800">
+            <div className="flex-1 px-5 py-5 overflow-y-auto text-sm text-surface-300">
               {children}
             </div>
 
             {/* Footer */}
             {footer && (
-              <div className="px-5 py-4 border-t border-surface-100 bg-surface-50 flex items-center justify-end gap-2.5">
+              <div className="px-5 py-4 border-t border-surface-200/30 bg-surface-100/50 flex items-center justify-end gap-2.5">
                 {footer}
               </div>
             )}
