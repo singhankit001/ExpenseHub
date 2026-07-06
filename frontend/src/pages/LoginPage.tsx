@@ -4,9 +4,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { GoogleLogin } from '@react-oauth/google';
+import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
+import { motion } from 'framer-motion';
+import { Wallet, LogIn } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().trim().min(1, 'Email is required').email('Invalid email address'),
@@ -16,7 +19,7 @@ const loginSchema = z.object({
 type LoginFields = z.infer<typeof loginSchema>;
 
 export const LoginPage = () => {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -33,48 +36,115 @@ export const LoginPage = () => {
     try {
       await login(data);
       navigate('/dashboard', { replace: true });
-    } catch (error) {
-      // toast notification is already fired by hook
+    } catch {
+      // toast fired inside useAuth
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Card className="border border-surface-200">
-      <CardHeader className="text-center">
-        <CardTitle className="text-xl font-bold text-surface-900">Welcome Back</CardTitle>
-        <CardDescription>Enter your credentials to access your account</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, type: 'spring', stiffness: 120, damping: 20 }}
+      className="w-full"
+    >
+      {/* Header */}
+      <div className="flex flex-col items-center text-center mb-8">
+        <div className="p-2.5 bg-gradient-to-tr from-brand-500 to-accent-violet rounded-2xl shadow-[0_0_24px_rgba(99,102,241,0.4)] mb-4">
+          <Wallet className="w-6 h-6 text-white" />
+        </div>
+        <h1 className="text-2xl font-black tracking-tight text-white">Welcome back</h1>
+        <p className="text-sm text-surface-500 mt-1">Sign in to your ExpenseFlow account</p>
+      </div>
+
+      {/* Card */}
+      <div className="glass-card rounded-2xl border border-surface-200/30 shadow-modal p-6 md:p-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
           <Input
             label="Email Address"
-            id="email"
+            id="login-email"
             type="email"
+            autoComplete="email"
             placeholder="name@example.com"
             error={errors.email?.message}
             {...register('email')}
           />
-          <Input
-            label="Password"
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            error={errors.password?.message}
-            {...register('password')}
-          />
-          <Button type="submit" variant="primary" className="w-full mt-2" isLoading={isSubmitting}>
-            Log In
-          </Button>
+
+          <div className="flex flex-col gap-1.5">
+            <Input
+              label="Password"
+              id="login-password"
+              type="password"
+              autoComplete="current-password"
+              placeholder="Enter your password"
+              error={errors.password?.message}
+              {...register('password')}
+            />
+            <div className="flex justify-end">
+              <span className="text-[11px] text-surface-500 hover:text-brand-400 cursor-pointer transition-colors">
+                Forgot password?
+              </span>
+            </div>
+          </div>
+
+          <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full"
+              isLoading={isSubmitting}
+              rightIcon={!isSubmitting ? <LogIn className="w-4 h-4" /> : undefined}
+            >
+              {isSubmitting ? 'Signing in...' : 'Sign In'}
+            </Button>
+          </motion.div>
         </form>
-        <div className="text-center mt-5 text-xs text-surface-600">
-          Don't have an account?{' '}
-          <Link to="/register" className="font-semibold text-brand-600 hover:text-brand-700 transition-colors">
-            Sign Up
-          </Link>
+
+        {/* Divider */}
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-surface-200/40" />
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="px-3 text-surface-500 bg-transparent">Or continue with</span>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Google Login */}
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={async (credentialResponse) => {
+              if (credentialResponse.credential) {
+                try {
+                  await loginWithGoogle(credentialResponse.credential);
+                  navigate('/dashboard', { replace: true });
+                } catch {
+                  // Error handled in useAuth
+                }
+              }
+            }}
+            onError={() => toast.error('Google Login Failed. Check your Client ID configuration.')}
+            theme="filled_black"
+            shape="rectangular"
+            text="continue_with"
+            size="large"
+            width="340"
+          />
+        </div>
+
+        {/* Sign up link */}
+        <p className="text-center mt-6 text-xs text-surface-600">
+          Don&apos;t have an account?{' '}
+          <Link
+            to="/register"
+            className="font-bold text-brand-400 hover:text-brand-300 transition-colors underline underline-offset-2"
+          >
+            Create one free
+          </Link>
+        </p>
+      </div>
+    </motion.div>
   );
 };
