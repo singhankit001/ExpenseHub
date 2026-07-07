@@ -40,6 +40,20 @@ export const ProfilePage = () => {
       const res = await authService.updateProfile(data);
       if (res.data.success) {
         updateUser(res.data.data.user);
+        
+        // Save to audit logs
+        const storedLogs = localStorage.getItem('finflow_audit_logs');
+        const logs = storedLogs ? JSON.parse(storedLogs) : [];
+        const newLog = {
+          id: `aud-${Date.now()}`,
+          action: 'PROFILE_UPDATE',
+          details: `Updated profile details: Name="${data.name}", Email="${data.email}"`,
+          ipAddress: '192.168.1.42',
+          userAgent: navigator.userAgent,
+          createdAt: new Date().toISOString(),
+        };
+        localStorage.setItem('finflow_audit_logs', JSON.stringify([newLog, ...logs]));
+
         toast.success('Profile updated successfully');
       }
     } catch (error: any) {
@@ -53,32 +67,32 @@ export const ProfilePage = () => {
   return (
     <div className="flex flex-col gap-6 animate-in">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-surface-900">User Profile</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-white">User Profile</h1>
         <p className="text-sm text-surface-600">Manage your personal settings and profile credentials.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Info Column */}
-        <Card className="lg:col-span-1 border border-surface-200">
+        <Card className="lg:col-span-1">
           <CardContent className="flex flex-col items-center text-center gap-4 pt-6">
-            <div className="w-20 h-20 rounded-full bg-brand-50 text-brand-600 font-extrabold flex items-center justify-center text-2xl border border-brand-100 shadow-sm">
+            <div className="w-20 h-20 rounded-full bg-brand-500/10 text-brand-400 font-extrabold flex items-center justify-center text-2xl border border-brand-500/20 shadow-md">
               {user?.name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-surface-900">{user?.name}</h2>
-              <p className="text-xs text-surface-500">{user?.email}</p>
+              <h2 className="text-lg font-bold text-white">{user?.name}</h2>
+              <p className="text-xs text-surface-650">{user?.email}</p>
             </div>
             
-            <div className="w-full border-t border-surface-100 pt-4 flex flex-col gap-3 text-left">
-              <div className="flex items-center gap-2.5 text-xs text-surface-700">
+            <div className="w-full border-t border-surface-200/50 pt-4 flex flex-col gap-3 text-left">
+              <div className="flex items-center gap-2.5 text-xs text-surface-600">
                 <UserIcon className="w-4 h-4 text-surface-500" />
                 <span>ID: {user?.id}</span>
               </div>
-              <div className="flex items-center gap-2.5 text-xs text-surface-700">
+              <div className="flex items-center gap-2.5 text-xs text-surface-600">
                 <Mail className="w-4 h-4 text-surface-500" />
                 <span>Email: {user?.email}</span>
               </div>
-              <div className="flex items-center gap-2.5 text-xs text-surface-700">
+              <div className="flex items-center gap-2.5 text-xs text-surface-600">
                 <Calendar className="w-4 h-4 text-surface-500" />
                 <span>Joined: {user?.createdAt ? formatDate(user.createdAt, 'd MMMM yyyy') : 'N/A'}</span>
               </div>
@@ -87,7 +101,7 @@ export const ProfilePage = () => {
         </Card>
 
         {/* Update Form Column */}
-        <Card className="lg:col-span-2 border border-surface-200">
+        <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Profile Details</CardTitle>
             <CardDescription>Update your name and primary email address.</CardDescription>
