@@ -438,12 +438,12 @@ export const ExpensesPage = () => {
             {...addForm.register('amount')}
           />
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="add-category" className="text-xs font-semibold text-surface-800">
+            <label htmlFor="add-category" className="text-xs font-semibold text-surface-700">
               Category
             </label>
             <select
               id="add-category"
-              className="w-full px-3 py-2 text-sm bg-white border border-surface-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-100 focus:border-brand-500"
+              className="w-full px-3.5 py-2.5 text-sm bg-surface-100 border border-surface-200/70 text-white placeholder-surface-500 rounded-xl focus:outline-none focus:ring-2 focus:border-brand-500 focus:ring-brand-500/20 transition-all duration-200"
               {...addForm.register('category')}
             >
               <option value="Food">Food</option>
@@ -467,13 +467,13 @@ export const ExpensesPage = () => {
             {...addForm.register('expenseDate')}
           />
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="add-notes" className="text-xs font-semibold text-surface-800">
+            <label htmlFor="add-notes" className="text-xs font-semibold text-surface-700">
               Notes (Optional)
             </label>
             <textarea
               id="add-notes"
               placeholder="Rent check paid on first date of the month."
-              className="w-full px-3 py-2 text-sm bg-white border border-surface-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-100 focus:border-brand-500 min-h-[80px]"
+              className="w-full px-3.5 py-2.5 text-sm bg-surface-100 border border-surface-200/70 text-white placeholder-surface-500 rounded-xl focus:outline-none focus:ring-2 focus:border-brand-500 focus:ring-brand-500/20 transition-all duration-200 min-h-[80px]"
               {...addForm.register('notes')}
             />
             {addForm.formState.errors.notes?.message && (
@@ -513,12 +513,12 @@ export const ExpensesPage = () => {
             {...editForm.register('amount')}
           />
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="edit-category" className="text-xs font-semibold text-surface-800">
+            <label htmlFor="edit-category" className="text-xs font-semibold text-surface-700">
               Category
             </label>
             <select
               id="edit-category"
-              className="w-full px-3 py-2 text-sm bg-white border border-surface-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-100 focus:border-brand-500"
+              className="w-full px-3.5 py-2.5 text-sm bg-surface-100 border border-surface-200/70 text-white placeholder-surface-500 rounded-xl focus:outline-none focus:ring-2 focus:border-brand-500 focus:ring-brand-500/20 transition-all duration-200"
               {...editForm.register('category')}
             >
               <option value="Food">Food</option>
@@ -539,12 +539,12 @@ export const ExpensesPage = () => {
             {...editForm.register('expenseDate')}
           />
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="edit-notes" className="text-xs font-semibold text-surface-800">
+            <label htmlFor="edit-notes" className="text-xs font-semibold text-surface-700">
               Notes (Optional)
             </label>
             <textarea
               id="edit-notes"
-              className="w-full px-3 py-2 text-sm bg-white border border-surface-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-100 focus:border-brand-500 min-h-[80px]"
+              className="w-full px-3.5 py-2.5 text-sm bg-surface-100 border border-surface-200/70 text-white placeholder-surface-500 rounded-xl focus:outline-none focus:ring-2 focus:border-brand-500 focus:ring-brand-500/20 transition-all duration-200 min-h-[80px]"
               {...editForm.register('notes')}
             />
           </div>
@@ -562,8 +562,8 @@ export const ExpensesPage = () => {
       {/* ─── Delete Confirmation Modal ─────────────────────────────────── */}
       <Modal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete Expense">
         <div className="flex flex-col gap-4">
-          <p className="text-xs text-surface-650 leading-relaxed text-balance">
-            Are you sure you want to soft delete the expense "{selectedExpense?.title}"? You will be able to view and restore it later.
+          <p className="text-sm text-surface-400 leading-relaxed text-balance">
+            Are you sure you want to soft delete the expense <span className="font-semibold text-white">"{selectedExpense?.title}"</span>? You will be able to view and restore it later.
           </p>
           <div className="flex justify-end gap-2.5 mt-2">
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
